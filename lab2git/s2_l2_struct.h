@@ -1,7 +1,7 @@
 #ifndef test_h
 #define test_h
 
-#include "list.h"
+#include "s2_l2_list.h"
 
 //QUEUE
 typedef struct passenger{

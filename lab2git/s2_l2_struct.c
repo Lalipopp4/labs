@@ -1,5 +1,5 @@
-#include "test.h"
-#include "list.h"
+#include "s2_l2_struct.h"
+#include "s2_l2.list.h"
 
 #include <stdlib.h>
 #include <stdio.h>
