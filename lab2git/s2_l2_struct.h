@@ -1,5 +1,5 @@
-#ifndef test_h
-#define test_h
+#ifndef s2_l2_struct_h
+#define s2_l2_struct_h
 
 #include "s2_l2_list.h"
 
@@ -24,12 +24,16 @@ typedef struct queue{
 	stand* st;
 }queue;
 
-void push_struct(stand* a, int r, lpas* pq);
+int do_everything_list(queue* q, list* l);
 
-void pop_struct(stand* a, int r);
+void push_struct(queue* q, lpas* pq, int time);
+
+void pop_struct(queue* q, int time);
 
 void read_struct(queue* q, int time);
 
-void push_struct1(queue* q, int r, lpas* pq);
+void delete_struct(queue* q);
 
-#endif // test_h
+void init_struct(queue* q);
+
+#endif // s2_l2_struct_h

@@ -1,5 +1,5 @@
-#ifndef test.list_h
-#define test.list_h
+#ifndef s2_l2_list_h
+#define s2_l2_list_h
 
 typedef struct pas{
 	char* id;
@@ -13,4 +13,8 @@ typedef struct list{
 	lpas* first;
 }list;
 
-#endif //test.list_h
+list* new_list(list* l);
+
+void delete_list(list* l);
+
+#endif //s2_l2_list_h
