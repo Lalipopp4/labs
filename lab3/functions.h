@@ -3,26 +3,28 @@
 
 #include "table.h"
 
-int check_table(Table* table);
+int check_table(Table** table);
 
-int T_clear(Table* table);
+void T_clear(Table** table);
 
 char* str_data(char* d);
 
-int T_show(Table* table);
+void T_insert(Table** table);
 
-int T_insert(Table* table);
+void T_delete(Table** table);
 
-int T_delete(Table* table);
+void T_search(Table** table);
 
-int T_search(Table* table);
+void T_read(Table** table);
 
-int T_read(Table* table);
-
-int T_create(Table* table);
+void T_create(Table** table);
 
 int inform();
 
-void delete_table(Table* table);
+void delete_table(Table** table);
+
+void T_par_table(Table** table);
+
+int data_int(char* k);
 
 #endif // functions_h

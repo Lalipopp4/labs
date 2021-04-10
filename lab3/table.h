@@ -2,21 +2,17 @@
 #define table_h
 
 typedef struct info{
+	int release;
 	double one;
 	double two;
 	char* data;
 }Info;
-/*
-typedef struct intfor{
-	int release;
-	Info info;
-}InfoR;
-*/
+
 typedef struct item{
 	int key1;
 	char* key2;
-	int release;
 	Info* info;
+	struct item* next;
 }Item;
 
 typedef struct keyspace1{
@@ -24,29 +20,50 @@ typedef struct keyspace1{
 	int par;
 	int busy;
 	Item* item;
+	Item* first;
 }KS1;
 
 typedef struct keyspace2{
 	char* key;
-	int release;
 	Item* item;
+	int busy;
+	Item* first;
 }KS2;
 
 typedef struct table{
-	int msize;
-	int csize;
+	int size;
 	KS1* ks1;
 	KS2* ks2;
+	int* ks1_size;
+	int* ks2_size;
 }Table;
 
-Table* create_table(int msize);
+Table* create_table(int size);
 
-void insert_table(Table* table, int key1, char* key2, Info* info);
+void insert_table(Table* table);
 
-void search_table(Table* table, int key1, char* key2);
+Item* search_table(Table* table, int key1, char* key2);
 
 void read_table(Table* table);
 
 void delete_item_table(Table* table, int key1, char* key2);
+
+void ks1_search_read_table(Table* table, int key);
+
+void ks2_search_read_table(Table* table, char* key);
+
+Item* ks1_search_table(Table* table, int key);
+
+Item* ks2_search_table(Table* table, char* key);
+
+void clear_table(Table* table);
+
+void ks1_delete_item_table(Table* table, int key);
+
+void ks2_delete_item_table(Table* table, char* key);
+
+void delete_item_table(Table* table, int key1, char* key2);
+
+Table* parent_table(Table* table, Table* par_table);
 
 #endif //table_h
