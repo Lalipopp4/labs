@@ -77,7 +77,7 @@ void insert_table(Table* table){
 	u = table->ks2[hash2].busy;
 	KS2* q;
 	q = table->ks2;
-	while (u && (int)(q[hash2].key) != (int)key2){
+	while (u && strcmp(table->ks2[hash2].key, key2)){
 		hash2 = ((hash2 + hash_2((int)key2, size)) % size);
 	}
 	if (m && u){
@@ -153,12 +153,10 @@ Item* ks1_search_table(Table* table, int key){
 Item* ks2_search_table(Table* table, char* key){
 	int r = table->size;
 	int hash = hash_1((int)key, r);
-	while (table->ks2[hash].busy && (int)table->ks2[hash].key != (int)key){
+	while (table->ks2[hash].busy && strcmp(table->ks2[hash].key, key)){
 		hash = ((hash + hash_2((int)key, r)) % r);
 	}
 	if (!(table->ks2[hash].busy)) return NULL;
-	double n,m;
-	char* f;
 	Item* it = table->ks2[hash].first;
 	return it;
 }
@@ -241,7 +239,10 @@ void ks2_delete_item_table(Table* table, char* key){
 	int r = table->size;
 	int hash = hash_1((int)key, r);
 	puts("YY");
-	while ((int)table->ks2[hash].key != (int)key){
+	while (strcmp(table->ks2[hash].key, key)){
+		printf("%s %s\n", table->ks2[hash].key, key);
+		printf("%d", (int)"a");
+		printf("%d %d\n", (int)table->ks2[hash].key, (int)key);
 		hash = ((hash + hash_2((int)key, r)) % r);
 	}
 	puts("GG");
