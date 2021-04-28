@@ -2,7 +2,6 @@
 #define table_h
 
 typedef struct info{
-	int release;
 	double one;
 	double two;
 	char* data;
@@ -11,7 +10,7 @@ typedef struct info{
 typedef struct item{
 	int key1;
 	char* key2;
-	Info* info;
+	Info info;
 	struct item* next;
 }Item;
 
@@ -19,13 +18,14 @@ typedef struct keyspace1{
 	int key;
 	int par;
 	int busy;
-	Item* item;
+	//Item item;
 	Item* first;
+	Item* cur;
 }KS1;
 
 typedef struct keyspace2{
 	char* key;
-	Item* item;
+	Item* cur;
 	int busy;
 	Item* first;
 }KS2;

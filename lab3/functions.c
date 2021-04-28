@@ -29,19 +29,29 @@ void T_clear(Table** table){
 
 char* str_data(char d[]){
 	printf("%s", d);
-	char* data = NULL;
-	char c;
-	int i = 0;
-	scanf("%c", &c);
-	while (c != '\n'){
-		if (i % 10 == 0) data = realloc(data, (i + 10) * sizeof(char));
-		data[i] = c;
-		scanf("%c", &c);
-		i++;
-	}
-	return data;
+	char buf[20] = {0};
+	char* res = NULL;
+	int len = 0;
+	int n = 0;
+	do{
+		n = scanf("%20[^\n]",buf);
+		if(n < 0){
+			if(!res) return NULL;	
+		} else if(n > 0){
+			int chunk_len = strlen(buf);
+			int str_len = len + chunk_len;
+			res = realloc(res,str_len + 1);
+			memcpy(res + len, buf, chunk_len);
+			len = str_len;
+		} else{
+			scanf("%*c");
+		}
+	}while(n > 0);
+
+	if(len > 0) res[len] = '\0';
+	else res = calloc(1,sizeof(char));
+	return res;
 }
-	
 
 int data_int(char* k){
 	int n = 1, g;
@@ -61,7 +71,7 @@ void T_delete(Table** table){
 		printf("2) KS2 key.\n");
 		printf("3) Both keys.\n");
 		printf("Your choice: ");
-		scanf("%d", &g);
+		scanf("%d%*c", &g);
 	}while(g <= 0 || g >= 4 || n != 1);
 	if (g == 1){
 		int key = data_int("Enter your key: ");
@@ -74,7 +84,8 @@ void T_delete(Table** table){
 	}
 	else{
 		int key1 = data_int("Enter first key: ");
-		char* key2 = str_data("Enter second key: ");
+		char* key2 = NULL;
+		key2 = str_data("Enter second key: ");
 		delete_item_table(*table, key1, key2);
 		free(key2);
 	}
@@ -110,23 +121,29 @@ void T_search(Table** table){
 		int g = data_int("Enter your key: ");
 		it = ks1_search_table(*table, g);
 		int i = 0;
-		while(it){
+		while(it[i].key1){
 			printf("\nElement with keys: %d and %s.\n", it[i].key1, it[i].key2);
-			printf("Float numbers are %lf and %lf.\n", it[i].info->one, it[i].info->two);
-			printf("Your data is: %s.\n", it[i].info->data);
-			it = it->next;
+			printf("Float numbers are %lf and %lf.\n", it[i].info.one, it[i].info.two);
+			printf("Your data is: %s.\n", it[i].info.data);
+			free(it[i].key2);
+			free(it[i].info.data);
+			i++;
 		}
 	}
 	else if (g == 2){
-		char* g = str_data("Enter your key: ");
+		char* g = NULL;
+		g = str_data("Enter your key: ");
 		it = ks2_search_table(*table, g);
 		int i = 0;
-		while(it){
+		while(it[i].key1){
 			printf("\nElement with keys: %d and %s.\n", it[i].key1, it[i].key2);
-			printf("Float numbers are %lf and %lf.\n", it[i].info->one, it[i].info->two);
-			printf("Your data is: %s.\n", it[i].info->data);
-			it = it->next;
+			printf("Float numbers are %lf and %lf.\n", it[i].info.one, it[i].info.two);
+			printf("Your data is: %s.\n", it[i].info.data);
+			free(it[i].key2);
+			free(it[i].info.data);
+			i++;
 		}
+		
 		free(g);
 	}
 	else{
@@ -134,10 +151,11 @@ void T_search(Table** table){
 		char* g2 = str_data("Enter second key: ");
 		it = search_table(*table, g, g2);
 		printf("\nElement with keys: %d and %s.\n", it->key1, it->key2);
-		printf("Float numbers are %lf and %lf.\n", it->info->one, it->info->two);
-		printf("Your data is: %s.\n", it->info->data);
+		printf("Float numbers are %lf and %lf.\n", it->info.one, it->info.two);
+		printf("Your data is: %s.\n", it->info.data);
 		free(g2);
 	}
+	free(it);
 	}
 }
 void T_create(Table** table){
@@ -161,11 +179,11 @@ void T_par_table(Table** table){
 		Item* it = (*par_table)->ks1[i].first;
 		printf("Key: %d.\n", (*par_table)->ks1[i].key);
 		for (int j = 0; j < (*par_table)->ks1_size[i]; j ++){
-			n = it->info->one;
-			m = it->info->two;
-			printf("Element with keys: %d and %s.\n", (*par_table)->ks1[i].key, (*par_table)->ks1[i].item->key2);
+			n = it->info.one;
+			m = it->info.two;
+			printf("Element with keys: %d and %s.\n", (*par_table)->ks1[i].key, it->key2);
 			printf("Float numbers are %lf and %lf.\n", n, m);
-			printf("Your data is: %s.\n", it->info->data);
+			printf("Your data is: %s.\n", it->info.data);
 			printf("Parent key is %d.\n", (*par_table)->ks1[i].par);
 		}
 	}
