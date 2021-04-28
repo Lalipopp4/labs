@@ -3,7 +3,7 @@
 
 int check_tree(Tree** tree);
 
-unsigned int data_int(char* k);
+unsigned int int_data(char* k);
 
 char* str_data(char* k);
 
@@ -16,5 +16,9 @@ void read_t(Tree** tree);
 void delete_t(Tree** tree);
 
 void clear_t(Tree** tree);
+
+void create_t(Tree** tree);
+
+void search_n_t(Tree** tree);
 
 #endif //functions_h

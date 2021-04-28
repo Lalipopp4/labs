@@ -6,11 +6,12 @@
 
 int main() {
 	Tree* tree = NULL;
-	create_tree(tree);
 	int h;
-	void (*actions[8])(Tree** tree) = {&insert_t, &search_t, &delete_t, &read_t, &clear_t, NULL};
+	void (*actions[8])(Tree** tree) = {&create_t, &insert_t, &search_t, &search_n_t, &delete_t, &read_t, &clear_t, NULL};
 	do{
 		h = info();
 		if (actions[h]) actions[h](&tree);
-	}while (h < 5);
+	}while (h < 7);
+	printf("Byvayte, ihtiandry.\n");
+	return 0;
 }
