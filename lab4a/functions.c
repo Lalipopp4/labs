@@ -54,46 +54,50 @@ unsigned int int_data(char* k){
 
 void insert_t(Tree** tree){
 	if (check_tree(tree) == 0) return ;
-	clock_t t1 = clock();
-	insert_tree(*tree);
-	clock_t t2 = clock();
-	printf("Time to insert: %f\n", (double)(t2 - t1) / CLOCKS_PER_SEC);
+	int n = int_data("Keyboard input (1) or file (1>): ");
+	unsigned int key;
+	char* one = NULL;
+	char* two = NULL;
+	//int n = 1;
+	if (n == 1){
+		key = int_data("Enter your key: ");
+		one = str_data("Enter first string: ");
+		two = str_data("Enter second string: ");
+	}
+	else{
+		int s1, s2;
+		FILE* f = fopen((*tree)->file, "rb");
+		if (f){
+		fread(&key, sizeof(unsigned int), 1, f);
+		fread(&s1, sizeof(int), 1, f);
+		fread(one, s1, 1, f);
+		fread(&s2, sizeof(int), 1, f);
+		fread(two, s2, 1, f);}
+		else{
+			printf("No file in memory.\n");
+			return ;
+		}
+
+	}
+	insert_tree(*tree, key, one, two);
 }
 
 void read_t(Tree** tree){
 	Node* node = (*tree)->root;
 	int key = int_data("Enter max key: ");
-	clock_t t1 = clock();
 	read_tree(node, key);
-	clock_t t2 = clock();
-	printf("Time to read: %f\n", (double)(t2 - t1) / CLOCKS_PER_SEC);
 }
 
 void search_t(Tree** tree){
 	int key = int_data("Enter your key: ");
-	Node* node = (*tree)->root;
-	Item* it;
-	clock_t t1 = clock();
-	while (node){
-		if (key > node->key){
-			node = node->right;
-		}
-		else if(key < node->key){
-			node = node->left;
-		}
-		else{
-			printf("Key is: %d.\n", key);
-			it = search_tree(node);
-			break;
-		}
-	}
-	if (!node) printf("No node with this key.\n");
-	else{
+	Item* it = search_tree(*tree, key);
+	if (it){
 		printf("First string: %s\n", it->one);
 		printf("Second string: %s\n", it->two);
 	}
-	clock_t t2 = clock();
-	printf("Time to search: %f\n", (double)(t2 - t1) / CLOCKS_PER_SEC);
+	else{
+		printf("No node in memory.\n");
+	}
 }
 
 void search_n_t(Tree** tree){
@@ -101,35 +105,31 @@ void search_n_t(Tree** tree){
 	int n = 100000;
 	int *qn = &n;
 	Item* it;
-	clock_t t1 = clock();
-	search_near_key_tree((*tree)->root, key, qn, it);
+	it = search_near_key_tree((*tree)->root, key, qn, it);
 	int h = 1;
 	if (it->next)
 		h = int_data("Enter number of item: ");
-	for (int i = 0; i < n - 1; i ++){
+	for (int i = 0; i < h - 1; i ++){
 		it = it->next;
 	}
-	printf("Key: %d.\n", key);
+	printf("Key: %d.\n", key + *qn);
+	if (*qn < 0) *qn *= (-1);
 	printf("Difference between keys is %d.\n", *qn);
 	printf("First string: %s\n", it->one);
 	printf("Second string: %s\n", it->two);
-	clock_t t2 = clock();
-	printf("Time to search nearest: %f\n", (double)(t2 - t1) / CLOCKS_PER_SEC);
 }
 
 void delete_t(Tree** tree){
 	int key = int_data("Enter your key: ");
 	Node* node = (*tree)->root;
-	clock_t t1 = clock();
 	delete_node(*tree, node, key);
-	printf("%d\n", (*tree)->root->key);
-	clock_t t2 = clock();
-	printf("Time to search delete node: %f\n", (double)(t2 - t1) / CLOCKS_PER_SEC);
 }
 
 void clear_t(Tree** tree){
-	if (check_tree(tree) == 1)
-	clear_tree(*tree);
+	if (check_tree(tree) == 1){
+	puts("HH");
+	*tree = clear_tree(*tree);}
+
 }
 
 void create_t(Tree** tree){
@@ -137,7 +137,8 @@ void create_t(Tree** tree){
 		printf("No need in creating a tree, it is already created.\n");
 	}
 	else{
-		*tree = create_tree();
+		char* f = str_data("Enter name of input file: ");
+		*tree = create_tree(f);
 		printf("Tree was successfully created.\n");
 	}
 }

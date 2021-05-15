@@ -23,23 +23,21 @@ typedef struct tree{
 	char* file;
 }Tree;
 
-Tree* create_tree();
+Tree* create_tree(char* f);
 
 void read_tree(Node* node, int key);
 
-Item* search_tree(Node* node);
+Item* search_tree(Tree* tree, int key);
 
-void search_near_key_tree(Node* node, int key, int* qn, Item* it);
+Item* search_near_key_tree(Node* node, int key, int* qn, Item* it);
 
 void file_tree(Tree* tree);
 
-void clear_tree(Tree* tree);
+Tree* clear_tree(Tree* tree);
 
 void clear_node(Node* node);
 
-void insert_tree(Tree* tree);
-
-void delete_tree(Node* node);
+void insert_tree(Tree* tree, int key, char* one, char* two);
 
 Node* delete_node(Tree* tree, Node* node, int key);
 

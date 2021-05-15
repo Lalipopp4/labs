@@ -3,6 +3,7 @@
 
 #include "tree.h"
 #include "functions.h"
+#include "benchtime.h"
 
 int main() {
 	Tree* tree = NULL;
@@ -12,6 +13,10 @@ int main() {
 		h = info();
 		if (actions[h]) actions[h](&tree);
 	}while (h < 7);
+	clear_t(&tree);
+	printf("Do you want to check time (0/1)?\n");
+	h = int_data("Your choise: ");
+	if (h) bench();
 	printf("Byvayte, ihtiandry.\n");
 	return 0;
 }

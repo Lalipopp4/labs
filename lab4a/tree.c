@@ -1,37 +1,18 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <math.h>
 
 #include "tree.h"
 #include "functions.h"
 
-Tree* create_tree(){
+Tree* create_tree(char* f){
 	Tree* tree = (Tree *)calloc(1, sizeof(Tree));
-	tree->file = str_data("Enter name of input file: ");
+	tree->file = f;
 	tree->root = NULL;
 	return tree;
 }
 
-void insert_tree(Tree* tree){
-	int n = int_data("Keyboard input (1) or file (1>): ");
-	unsigned int key;
-	char* one = NULL;
-	char* two = NULL;
-	//int n = 1;
-	if (n == 1){
-		key = int_data("Enter your key: ");
-		one = str_data("Enter first string: ");
-		two = str_data("Enter second string: ");
-	}
-	else{
-		int s1, s2;
-		FILE* f = fopen(tree->file, "rb");
-		fread(&key, sizeof(unsigned int), 1, f);
-		fread(&s1, sizeof(int), 1, f);
-		fread(one, s1, 1, f);
-		fread(&s2, sizeof(int), 1, f);
-		fread(two, s2, 1, f);
-	}
+void insert_tree(Tree* tree, int key, char* one, char* two){
+	
 	Node* node = tree->root;
 	Node* prev = NULL;
 	Node* next = NULL;
@@ -65,12 +46,15 @@ void insert_tree(Tree* tree){
 		}
 		
 	}
-	node = (Node *)malloc(sizeof(Node));
+	node = (Node *)calloc(1, sizeof(Node));
 	node->key = key;
 	node->first = (Item *)malloc(sizeof(Item));
 	node->first->one = one;
 	node->first->two = two;
 	node->first->next = NULL;
+		
+	
+	
 	node->left = NULL;
 	node->right = NULL;
 	node->root = tree->root;
@@ -99,10 +83,24 @@ void read_tree(Node* node, int key){
 	}
 }
 
-Item* search_tree(Node* node){
+Item* search_tree(Tree* tree, int key){
+	Node* node = tree->root; 
+	while (node){
+		if (key > node->key){
+			node = node->right;
+		}
+		else if(key < node->key){
+			node = node->left;
+		}
+		else{
+			printf("Key is: %d.\n", key);
+			break;
+		}
+	}
+	if (!node) return NULL;
 	Item* it = node->first;
 	int n = 1, j = 0;
-	if (it->next)
+	if (it && it->next)
 		n = int_data("Enter number of item: ");
 	for (int i = 0; i < n - 1; i ++){
 		it = it->next;
@@ -118,8 +116,10 @@ void clear_node(Node* node){
 		Item* n = NULL;
 		while(it){
 			n = it->next;
-			free(it->one);
-			free(it->two);
+			if (it->one){
+				free(it->one);
+				free(it->two);
+			}
 			free(it);
 			it = n;
 		}
@@ -127,20 +127,22 @@ void clear_node(Node* node){
 	}
 }
 
-void clear_tree(Tree* tree){
+Tree* clear_tree(Tree* tree){
+	
 	clear_node(tree->root);
+	free(tree->file);
 	free(tree);
+	return NULL;
 }
 
-void search_near_key_tree(Node* node, int key, int *qn, Item* it){
-	if (node && pow(node->key - key, 2) < *qn){
-		if ( pow(node->key - key, 2) < *qn){
-			*qn = pow(node->key - key, 2);
-			it = node->first;
-		}
-		search_near_key_tree(node->right, key, qn, it);
-		search_near_key_tree(node->left, key, qn, it);
+Item* search_near_key_tree(Node* node, int key, int *qn, Item* it){
+	if (node && (node->key - key) * (node->key - key) < (*qn) * (*qn)){
+		*qn = node->key - key;
+		it = node->first;
+		it = search_near_key_tree(node->right, key, qn, it);
+		it = search_near_key_tree(node->left, key, qn, it);
 	}
+	return it;
 }
 
 Node * minValueNode(Node* node){
@@ -176,6 +178,7 @@ Node* delete_node(Tree* tree, Node* node, int key){
 				tree->root = temp;
 				free(node->first->one);
 				free(node->first->two);
+				free(node->first);
 				free(node);
 			}
 			return temp;
@@ -202,6 +205,7 @@ Node* delete_node(Tree* tree, Node* node, int key){
 				tree->root = temp;
 				free(node->first->one);
 				free(node->first->two);
+				free(node->first);
 				free(node);
 			}
 			return temp;
