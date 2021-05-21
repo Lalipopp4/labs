@@ -3,7 +3,7 @@
 #include <stdlib.h>
 
 #include "graph.h"
-#include "functions.h"
+#include "funcs.h"
 
 int G_insert_node(Graph* graph){
 	Coords c;
@@ -82,7 +82,6 @@ int G_search_BF(Graph* graph){
 	else return -1;
 
 	Route r = search_BF(*graph, c1, c2);
-
 	if(r.distance == -1){
 		printf("No pair.\n");
 	}else if(r.path){
@@ -118,14 +117,15 @@ int G_search_Deikstra(Graph* graph){
 	if(n) c2.y = n;
 	else return -1;
 
-	Route r = search_Deikstra(*graph, c1, c2);
+	Route* r = search_Deikstra(*graph, c1, c2);
 
-	if(r.distance == -1){
+	if (!r) return -1;
+	if((*r).distance == -1){
 		printf("No pair.\n");
-	}else if(r.path){
-		print_path(r.path, *graph);
-		printf("Distance is  %.4f.\n", r.distance);
-		delete_queue(&r.path);
+	}else if((*r).path){
+		print_path((*r).path, *graph);
+		printf("Distance is  %.4f.\n", (*r).distance);
+		delete_queue(&(*r).path);
 	}else printf("No way.\n");
 
 	return 0;

@@ -58,7 +58,7 @@ Route search_BF(Graph graph, Coords c1, Coords c2);
 
 void delete_list(Item** head);
 
-Route search_Deikstra(Graph graph, Coords c1, Coords c2);
+Route* search_Deikstra(Graph graph, Coords c1, Coords c2);
 
 void write_to_file(Graph graph, FILE* file);
 

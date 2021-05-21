@@ -3,7 +3,7 @@
 #include <string.h>
 
 #include "graph.h"
-#include "functions.h"
+#include "funcs.h"
 
 #define FLT_MAX 10.0
 
@@ -253,7 +253,7 @@ Route search_BF(Graph graph, Coords c1, Coords c2){
 	memset(parents, -1, size * sizeof(int));
 	float distance[size];
 	for(int i = 0; i < size; i++){
-		distance[i] = FLT_MAX;
+		distance[i] = 0;
 	}
 
 	Item_e* list = NULL;
@@ -286,7 +286,7 @@ Route search_BF(Graph graph, Coords c1, Coords c2){
 
 int find_min(Graph graph, int size, char visited[size], float distance[size]){
 	int index = -1;
-	float min = FLT_MAX;
+	float min = 10000;
 	for(int i = 0; i < size; i++){
 		if(!visited[i] && distance[i] < min && graph.node[i].busy == 1){
 			min = distance[i];
@@ -296,7 +296,7 @@ int find_min(Graph graph, int size, char visited[size], float distance[size]){
 	return index;
 }
 
-Route search_Deikstra(Graph graph, Coords c1, Coords c2){
+Route* search_Deikstra(Graph graph, Coords c1, Coords c2){
 	int index1 = -1, index2 = -1;
 	for(int i = 0; i < graph.size && graph.node[i].busy; i++){
 		if(graph.node[i].busy == 1 && compare(graph.node[i].coords, c1)){
@@ -311,8 +311,8 @@ Route search_Deikstra(Graph graph, Coords c1, Coords c2){
 	}
 	
 	if(index1 < 0 || index2 < 0){
-		Route route;
-		route.distance = -1;
+		Route* route;
+		route->distance = -1;
 		return route;
 	}
 
@@ -324,7 +324,7 @@ Route search_Deikstra(Graph graph, Coords c1, Coords c2){
 	memset(parents, -1, size * sizeof(int));
 	float distance[size];
 	for(int i = 0; i < size; i++){
-		distance[i] = FLT_MAX;
+		distance[i] = 0;
 	}
 
 	distance[index1] = 0;
@@ -344,6 +344,10 @@ Route search_Deikstra(Graph graph, Coords c1, Coords c2){
 		}
 		visited[cur_index] = 1;
 		for(Item* ptr = graph.node[cur_index].first; ptr; ptr = ptr->next){
+			if (ptr->weight < 0){
+				printf("Error!\n");
+				return NULL;
+			}
 			if(distance[ptr->index] > distance[cur_index] + ptr->weight){
 				distance[ptr->index] = distance[cur_index] + ptr->weight;
 				parents[ptr->index] = cur_index;
@@ -351,11 +355,11 @@ Route search_Deikstra(Graph graph, Coords c1, Coords c2){
 		}
 	}
 
-	Item_e* path = NULL;;
+	Item_e* path = NULL;
 	find_path(graph, size, parents, index1, index2, &path);
 	Route route = {distance[index2], path};
-
-	return route;
+	Route* r = &route;
+	return r;
 }
 
 void write_to_file(Graph graph, FILE* file){
