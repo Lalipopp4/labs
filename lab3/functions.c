@@ -153,6 +153,8 @@ void T_search(Table** table){
 		printf("\nElement with keys: %d and %s.\n", it->key1, it->key2);
 		printf("Float numbers are %lf and %lf.\n", it->info.one, it->info.two);
 		printf("Your data is: %s.\n", it->info.data);
+		free(it->key2);
+		free(it->info.data);
 		free(g2);
 	}
 	free(it);

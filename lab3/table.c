@@ -62,15 +62,27 @@ void insert_table(Table* table){
 	while (table->ks1[hash1].busy && table->ks1[hash1].key != key1){
 		hash1 = ((hash1 + hash_2(key1, size)) % size);
 	}
-	int hash2 = hash_1((int)key2, size);
-	while (table->ks2[hash2].busy && strcmp(table->ks2[hash2].key, key2)){
-		hash2 = ((hash2 + hash_2((int)key2, size)) % size);
+	Item* it = NULL;
+	if (table->ks1[hash1].busy) it = table->ks1[hash1].first;
+	while (it){
+		if (*it->key2 == *key2){
+			printf("This composite key already exists.\n");
+			return ;
+		}
+		it = it->next;
 	}
+	it = NULL;
+	
+	int hash2 = hash_1(*key2, size);
+	while (table->ks2[hash2].busy && *table->ks2[hash2].key!= *key2){
+		hash2 = ((hash2 + hash_2(*key2, size)) % size);
+	}/*
 	if (table->ks1[hash1].busy && table->ks2[hash2].busy){
+		printf("%d %s\n", table->ks1[hash1].key, table->ks2[hash2].key);
 		printf("This composite key already exists.\n");
 		return ;
-	}
-	Item* it = NULL;
+	}*/
+	
 	if (table->ks1_size[hash1] == 0){
 		it = (Item *)malloc(sizeof(Item));
 		it->next = NULL;
@@ -145,6 +157,7 @@ Item* ks1_search_table(Table* table, int key){
 	}
 	if (!(table->ks1[hash].busy)) return NULL;
 	Item* it = NULL;
+	printf("Found!\n");
 	it = (Item *)malloc(table->ks1_size[hash] * sizeof(Item));
 	Item* itt = table->ks1[hash].first;
 	for (int i = 0; i < table->ks1_size[hash]; i ++){
@@ -162,13 +175,18 @@ Item* ks1_search_table(Table* table, int key){
 
 Item* ks2_search_table(Table* table, char* key){
 	int r = table->size;
-	int hash = hash_1((int)key, r);
-	while (table->ks2[hash].busy && strcmp(table->ks2[hash].key, key)){
-		hash = ((hash + hash_2((int)key, r)) % r);
+	int hash = hash_1(*key, r);
+	puts("VV");
+	while (table->ks2[hash].busy && *table->ks2[hash].key != *key){
+		puts("EE");
+		hash = ((hash + hash_2(*key, r)) % r);
 	}
+	puts("RR");
 	if (!(table->ks2[hash].busy)) return NULL;
 	Item* it = NULL;
-	it = (Item *)malloc(table->ks1_size[hash] * sizeof(Item));
+	printf("Found!\n");
+	printf("%d\n",table->ks2_size[hash]);
+	it = (Item *)malloc(table->ks2_size[hash] * sizeof(Item));
 	Item* itt = table->ks2[hash].first;
 	for (int i = 0; i < table->ks2_size[hash]; i ++){
 		it[i].info.data = (char *)malloc(sizeof(itt->info.data));
@@ -191,15 +209,21 @@ Item* search_table(Table* table, int key1, char* key2){
 	while (table->ks1[hash1].busy && table->ks1[hash1].key != key1){
 		hash1 = ((hash1 + hash_2(key1, r)) % r);
 	}
+	puts("ZZ");
 	if (!(table->ks1[hash1].busy)) return NULL;
 	Item* itt = table->ks1[hash1].first;
 	Item* it = NULL;
-	while (strcmp(it->key2, key2)){
+	puts("FF");
+	while (itt->next && *itt->key2 != *key2){
 		itt = itt->next;
 	}
+	printf("%s\n", itt->key2);
+	printf("Found!\n");
+	it = (Item *)malloc(sizeof(Item));
 	it->info.data = (char *)malloc(sizeof(itt->info.data));
 	it->key2 = (char *)malloc(sizeof(itt->key2));
 	it->key1 = itt->key1;
+	puts("DD");
 	it->info.one = itt->info.one;
 	it->info.two = itt->info.two;
 	strcpy(it->key2, itt->key2);
@@ -211,6 +235,7 @@ void read_table(Table* table){
 	for (int i = 0; i < table->size; i ++){
 		if (!(table->ks1_size[i])) continue;
 		Item* it = table->ks1[i].first;
+		printf("%d\n", table->ks1_size[i]);
 		for (int j = 0; j < table->ks1_size[i]; j ++){
 			printf("\nElement with keys: %d and %s.\n", it->key1, it->key2);
 			printf("Float numbers are %lf and %lf\n", it->info.one, it->info.two);
@@ -226,35 +251,53 @@ void ks1_delete_item_table(Table* table, int key){
 	while (table->ks1[hash].busy && table->ks1[hash].key != key){
 		hash = ((hash + hash_2(key, r)) % r);
 	}
-	if (!(table->ks1[hash].busy)){
+	/*
+	int i = 0, b = 0;
+	for (; i < r; i++){
+		if (table->ks1[hash].busy && table->ks1[hash].key ==  key) {
+			b = 1;
+			break;
+		}
+		
+	}
+	printf("%d\n", table->ks2_size[hash]);
+	*/
+	if (!table->ks1[hash].busy){
 		printf("No item in table.\n");
 		return ;
 	}
 	Item* it = table->ks1[hash].first;
 	for (int i = 0; i < table->ks1_size[hash]; i ++){
-		int hash2 = hash_1((int)it->key2, r);
-		while ( table->ks2[hash2].busy && strcmp(table->ks2[hash2].key, table->ks2[hash2].key)){
-			hash2 = ((hash2 + hash_2((int)it->key2, r)) % r);
+		int hash2 = hash_1(*it->key2, r);
+		while ( table->ks2[hash2].busy && *table->ks2[hash2].key != *table->ks2[hash2].key){
+			hash2 = ((hash2 + hash_2(*it->key2, r)) % r);
 		}
 		Item* pit;
-		if (table->ks2[hash2].busy){
+		puts("XX");
+		//if (table->ks2[hash2].busy){
 			Item* iit = table->ks2[hash2].first;
-			
+			pit = iit;
 			int j = 0;
-			for (; j < table->ks2_size[hash2]; j ++){
-				if (iit->key1 == it->key1 && !strcmp	(iit->key2, it->key2)) break;
+			for (; j < table->ks2_size[hash2] - 1; j ++){
+				if (iit->key1 == it->key1) break;
 				pit = iit;
 				iit = iit->next;
 			}
-			if (j + 1 < table->ks2_size[hash2])
+			puts("VV");
+			if (j == 0 && table->ks2_size[hash2] > 1) 	table->ks2[hash2].first = pit->next;
+			puts("SS");
+			if (j + 1 < table->ks2_size[hash2] && table->ks2_size[hash2] > 2)
 				pit->next = iit->next;
-			if (j == 0) table->ks2[hash2].first = pit->next;
-			if (table->ks2_size[hash2] == 0) table->ks2[hash2].busy = 0;
-		}
+			puts("DD");
+			if (table->ks2_size[hash2] == 1) table->ks2[hash2].busy = 0;
+		//}
+		puts("WW");
 		pit = it->next;
 		free(it->key2);
 		free(it->info.data);
 		free(it);
+		it = NULL;
+		puts("BB");
 		table->ks1[hash].first = NULL;
 		it = pit;
 		pit = NULL;
@@ -271,45 +314,62 @@ void ks1_delete_item_table(Table* table, int key){
 
 void ks2_delete_item_table(Table* table, char* key){
 	int r = table->size;
-	int hash = hash_1((int)key, r);
-	while (table->ks2[hash].busy && strcmp(table->ks2[hash].key, key)){
+	int hash = hash_1(*key, r);
+	int i = 0, b = 0;
+	while (table->ks2[hash].busy && *table->ks2[hash].key != *key){
+		//printf("--%d\n", *table->ks2[hash].key);
+		hash = ((hash + hash_2(*key, r)) % r);
+	}
+	/*
+	for (; i < r; i++){
+		if (table->ks2[hash].busy && !strcmp(table->ks2[hash].key, key)) {
+			b = 1;
+			break;
+		}3
+
 		hash = ((hash + hash_2((int)key, r)) % r);
 	}
-	if (!(table->ks2[hash].busy)){
+	puts("EE");*/
+	printf("%d %d\n", table->ks2_size[hash], hash);
+	if (!table->ks2[hash].busy){
 		printf("No item in table.\n");
 		return ;
 	}
 	Item* it = table->ks2[hash].first;
+	Item* pit = it;
 	for (int i = 0; i < table->ks2_size[hash]; i ++){
 		int hash1 = hash_1(it->key1, r);
 		while (table->ks1[hash1].busy && (table->ks1[hash1].key) != it->key1){
 			hash1 = ((hash1 + hash_2(it->key1, r)) % r);
 		}
-		Item* pit;
-		if (table->ks1[hash1].busy){
+		
+		//if (table->ks1[hash1].busy){
 			Item* iit = table->ks1[hash1].first;
-			
+			pit = iit;
 			int j = 0;
 			for (; j < table->ks1_size[hash1]; j ++){
-				if (iit->key1 == it->key1 && !strcmp	(iit->key2, it->key2)) break;
+				if (*iit->key2 == *it->key2) break;
 				pit = iit;
 				iit = iit->next;
 			}
-			if (j + 1 < table->ks1_size[hash1])
+			if (j == 0 && table->ks1_size[hash1] > 1) table->ks1[hash1].first = pit->next;
+			if (j + 1 < table->ks1_size[hash1] && table->ks1_size[hash1] > 2)
 				pit->next = iit->next;
-			if (j == 0) table->ks1[hash1].first = pit->next;
-			if (table->ks1_size[hash1] == 0) table->ks1[hash1].busy = 0;
-		}
+			
+			if (table->ks1_size[hash1] == 1) table->ks1[hash1].busy = 0;
+		//}
 		pit = it->next;
 		free(it->key2);
 		free(it->info.data);
 		free(it);
-		table->ks2[hash].first = NULL;
+		it = NULL;
+		
 		it = pit;
 		pit = NULL;
 		table->ks1_size[hash1] --;
 		
 	}
+	table->ks2[hash].first = NULL;
 	table->ks2[hash].busy = 0;
 	table->ks2_size[hash] = 0;
 }
@@ -317,49 +377,54 @@ void ks2_delete_item_table(Table* table, char* key){
 void delete_item_table(Table* table, int key1, char* key2){
 	int r = table->size;
 	int hash1 = hash_1(key1, r);
+	int b = 0;
 	while (table->ks1[hash1].busy && table->ks1[hash1].key != key1){
 		hash1 = ((hash1 + hash_2(key1, r)) % r);
 	}
-	if (!(table->ks1[hash1].busy)) return ;
-	int hash2 = hash_1((int)key2, r);
-	while (table->ks2[hash2].busy && strcmp(table->ks2[hash2].key, key2)){
-		hash2 = ((hash2 + hash_2((int)key2, r)) % r);
+	int hash2 = hash_1(*key2, r);
+	while (table->ks2[hash2].busy && *table->ks2[hash2].key != *key2){
+		hash2 = ((hash2 + hash_2(*key2, r)) % r);
 	}
-	if (!(table->ks2[hash2].busy)) return ;
+
+	if (!table->ks1[hash1].busy && !table->ks2[hash2].busy){
+		printf("No item in table.\n");
+		return ;
+	}
+	printf("%d\n", table->ks2_size[hash2]);
 	Item* it1 = table->ks1[hash1].first;
 	Item* it2 = table->ks2[hash2].first;
-	Item* pit1 = NULL;
-	Item* pit2 = NULL;
+	Item* pit1 = it1;
+	Item* pit2 = it2;
 	int j = 0;
-	for (; j < table->ks1_size[hash1]; j ++){
+	for (; j < table->ks1_size[hash1] - 1; j ++){
 		if (!strcmp(it1->key2,key2)) break;
 			pit1 = it1;
 			it1 = it1->next;
 			pit1->next = it1;
 	}
 	int i = 0;
-	for (; i < table->ks2_size[hash2]; i ++){
+	for (; i < table->ks2_size[hash2] - 1; i ++){
 		if (it2->key1 == key1) break;
 			pit2 = it2;
 			it2 = it2->next;
 			pit2->next = it2;
 	}
-	if (j + 1 < table->ks1_size[hash1] && table->ks1_size[hash1] > 1)
+	if (j == 0 && table->ks1_size[hash1] > 1){
+		table->ks1[hash1].first = pit1->next;
+	}
+	if (i == 0 && table->ks2_size[hash2] > 1){
+		table->ks2[hash2].first = pit2->next;
+	}
+	if (j + 1 < table->ks1_size[hash1] && table->ks1_size[hash1] > 2)
 		pit1->next = it1->next;
-	if (i + 1 < table->ks2_size[hash2] && table->ks2_size[hash2] > 1){
+	if (i + 1 < table->ks2_size[hash2] && table->ks2_size[hash2] > 2){
 		pit2->next = it2->next;
 	}
 	free(it1->key2);
 	free(it1->info.data);
 	free(it1);
-	if (j == 0 && table->ks1_size[hash1] > 1){
-		table->ks1[hash1].first = NULL;
-		table->ks1[hash1].first = pit1->next;
-	}
-	if (i == 0 && table->ks2_size[hash2] > 1){
-		table->ks1[hash1].first = NULL;
-		table->ks2[hash2].first = pit2->next;
-	}
+	it1 = NULL;
+	
 	table->ks1_size[hash1] --;
 	table->ks2_size[hash2] --;
 }
