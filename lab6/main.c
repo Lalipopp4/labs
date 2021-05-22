@@ -1,30 +1,102 @@
 #include <stdio.h>
+#include <time.h>
+#include <stdlib.h>
 
-#include "deque.h"
+#define N 10
+#define M 14
 
-int info(){
-	int g, n = 1;
-	char* buf[] = {"\nChoose any  option.\n", "0) Push in front.\n", "1) Push in back.\n", "2) Pop in front.\n", "3) Pop in back.\n", "4) Read deque from front.\n", "5) Read deque from back.\n", "6) Leave...\n", "Your choice: "};
-	do{
-		if (n != 1) scanf("%*s");
-		for (int i = 0; i < 9; i++){
-			printf("%s", buf[i]);
-		}
-		n = scanf("%d%*c", &g);
-	}while (g < 0 || g > 6 || n != 1);
-	return g;
+void wave(int pitch[N][M], int x, int y, int n){
+	if ((x >= 0 && x < N && y >= 0 && y < M && (pitch[x][y] == 0 || pitch[x][y] > n)) || n == -2){
+		pitch[x][y] = n;
+		if (n == -2) n = 0;
+		n++;
+		wave(pitch, x, y + 1, n);
+		wave(pitch, x, y - 1, n);
+		wave(pitch, x - 1, y, n);
+		wave(pitch, x + 1, y, n);
+		
+		
+	}
 }
 
-int main() {
-	Deque* deque = create_deque();
-	void (*actions[7])(Deque* deque) = {&push_front, &push_back, &pop_front, &pop_back, &read_deque_front, &read_deque_back, NULL};
+int find_path(int pitch[N][M], int path[N * M][2], int x, int y, int i){
+	if (pitch[x][y] == -2) return 0;
+	if (y >= 1 && pitch[x][y - 1] + 1 == pitch[x][y]){
+		path[i][0] = x;
+		path[i][1] = y - 1;
+		i++;
+		find_path(pitch, path, x, y - 1, i);
+	}
+	else if (y < M - 1 && pitch[x][y + 1] + 1 == pitch[x][y]){
+		path[i][0] = x;
+		path[i][1] = y + 1;
+		i++;
+		find_path(pitch, path, x, y + 1, i);
+	}
+	else if (x >= 1 && pitch[x - 1][y] + 1 == pitch[x][y]){
+		path[i][0] = x - 1;
+		path[i][1] = y;
+		i++;
+		find_path(pitch, path, x - 1, y, i);
+	}
+	else if (x < N - 1 && pitch[x + 1][y] + 1 == pitch[x][y]){
+		path[i][0] = x + 1;
+		path[i][1] = y;
+		i++;
+		find_path(pitch, path, x + 1, y, i);
+	}
+	return 0;
+}
+
+int main(){
+	srand(time(NULL));
+	int pitch[N][M];
 	int h;
-	do{
-		h = info();
-		if (actions[h])
-			actions[h](deque);
-	}while (h < 6); 
-	delete_deque(&deque);
-	printf("Bye bye!\n");
+	for (int i = 0; i < N; i++){
+		for (int j = 0; j < M; j++){
+			pitch[i][j] = (rand() % 3 + 1) / 2 - 1;
+		}
+	}
+	for (int i = 0; i < N; i++){
+		for (int j = 0; j < M; j++){
+			printf("%3d", pitch[i][j]);
+		}
+		printf("\n");
+	}
+	printf("\n");
+	int x = rand() % N;
+	int y = rand() % M;
+	pitch[x][y] = -2;
+	printf("%d %d\n", x, y);
+	int n = -2;
+	int* qn = &n;
+	wave(pitch, x, y, n);
+	printf("\n");
+	for (int i = 0; i < N; i++){
+		for (int j = 0; j < M; j++){
+			printf("%3d", pitch[i][j]);
+		}
+		printf("\n");
+	}
+	printf("\n");
+	int x1 = rand() % N;
+	int y1 = rand() % M;
+	printf("%d %d\n", x1, y1);
+	printf("\n");
+
+	if (pitch[x1][y1] <= 0) return 0;
+	
+	int path[pitch[x1][y1]][2];
+	int i = 1, j = 0;
+	path[0][0] = x1;
+	path[0][1] = y1;
+	find_path(pitch, path, x1, y1, i);
+	path[pitch[x1][y1]][0] = x;
+	path[pitch[x1][y1]][1] = y;
+	printf("Distance is %d.\n", pitch[x1][y1]);
+	printf("Path:\n");
+	for (int j = 0; j < pitch[x1][y1] + 1; j++){
+		printf("%d %d\n", path[j][0], path[j][1]);
+	}
 	return 0;
 }
